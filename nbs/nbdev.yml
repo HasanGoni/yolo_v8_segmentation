@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "yolo_v8_segmentation"
+  site-url: "https://HasanGoni.github.io/yolo_v8_segmentation"
+  description: "segementation training and inference with yolov8 model"
+  repo-branch: main
+  repo-url: "https://github.com/HasanGoni/yolo_v8_segmentation"
