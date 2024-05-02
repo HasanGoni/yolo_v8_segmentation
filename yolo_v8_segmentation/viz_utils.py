@@ -15,6 +15,58 @@ import matplotlib.patches as patches
 import matplotlib as mpl
 
 # %% ../nbs/02_viz_utils.ipynb 6
+
+
+def overlay_yolo_bbox(
+        im_path, 
+        msk_path, 
+        color=None, # color values other matplotlib colors
+        idx=None, # Index of image in the folder other random will be chosen
+        im_name=None, # Imge name with extension
+        fill=False, # whther to fill the mask or not
+        alpha=0.3 # alpha value for the mask for transparency
+        ):
+    'Creaete a overlay image from image and mask'
+
+
+    im_idx = idx if idx is not None else np.random.choice(len(im_path.ls()), 1)[0]
+    im_name = im_name if im_name is not None else im_path.ls()[im_idx].name
+    mask_name = f'{msk_path}/{im_name}'.replace('png', 'txt')
+
+
+
+    # Read the grayscale image
+    gray_img = cv2.imread(f'{im_path}/{im_name}', cv2.IMREAD_GRAYSCALE)
+    if gray_img is None:
+        raise ValueError("Could not read the grayscale image")
+    if color is None:
+        colors = mpl.colormaps.get_cmap('tab10')
+
+
+
+    # Convert image to 3 channels
+    rgb_img = np.stack([gray_img]*3, axis=-1)
+
+    image_h, image_w, _ = rgb_img.shape
+    fig, ax = plt.subplots()
+    ax.imshow(rgb_img)
+
+    with open(f'{mask_name}', 'r') as f:
+        for line in f:
+            parts = line.strip().split()
+            category_id = int(parts[0])
+            color = colors(category_id  %10) if color is None else color
+
+            x_center, y_center, width, height = [float(coord) for coord in parts[1:]]
+
+            bottom_left = ((x_center - width/2) * image_w, (y_center - height/2) * image_h)
+            bbox_w, bbox_h = width * image_w, height * image_h
+
+            patch = patches.Rectangle(bottom_left, bbox_w, bbox_h, fill=fill, color=color, alpha=alpha)
+            ax.add_patch(patch)
+    plt.axis('off')
+    plt.title('Image with mask')
+    plt.show()
 get_name = np.vectorize(lambda x: Path(x).name)
 
 # %% ../nbs/02_viz_utils.ipynb 13
